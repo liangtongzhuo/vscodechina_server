@@ -1,7 +1,6 @@
 const AV = require('leanengine');
 var rp = require('request-promise');
 var qs = require('querystring');
-
 /**
  * 留言点赞数的增加与减少
  */
