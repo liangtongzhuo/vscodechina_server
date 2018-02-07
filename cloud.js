@@ -1,6 +1,9 @@
 const AV = require('leanengine');
 var rp = require('request-promise');
 var qs = require('querystring');
+
+
+
 /**
  * 留言点赞数的增加与减少
  */
@@ -124,12 +127,12 @@ AV.Cloud.define('gitHubOauth', function (request) {
   }).then(body => {
     data = JSON.parse(body);
     // 根据个人信息查询，以前是否已经有注册的账号了
-    var user = new AV.Query('_User');
-    user.equalTo('email', data.email);
-    return user.find();
-  }).then(user => {
-    if (user && user.length) {
-      return user[0];
+    const users = new AV.Query('_User');
+    users.equalTo('email', data.email);
+    return users.find();
+  }).then(users => {
+    if (users && users.length > 0) {
+      return users[0];
     }
     // 如果以前没有则创建
     return AV.User.signUpOrlogInWithAuthData({
