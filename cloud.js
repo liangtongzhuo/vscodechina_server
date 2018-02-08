@@ -110,7 +110,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     + '&redirect_uri=http://127.0.0.1:3000/other/oauth&code='
     + request.params.code + '';
 
-  let access_token, data, userId,requestUserId = request.params.state || 0;
+  let access_token, data, userId, G_error, requestUserId = request.params.state || 0;
   // 换取 access_token
   return rp({
     method: 'POST',
@@ -130,11 +130,10 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     // 根据个人信息查询，以前是否已经有注册的账号 
     // 组合查询
     const users1 = new AV.Query('_User');
-    users1.equalTo('email', data.email);
+    users1.equalTo('username', data.email);
     const users2 = new AV.Query('_User');
     users2.equalTo('_id', requestUserId);
     var query = AV.Query.or(users1, users2);
-
     return query.find();
   }).then(users => {
     if (users && users.length > 0) {
@@ -151,13 +150,21 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     // 给创建的账号设置信息
     user.set('name', name(data.name));
     user.set('email', data.email);
+    user.set('username', data.email);
     user.set('blog', data.blog);
     user.set('bio', data.bio);
     user.set('github_url', data.html_url);
     user.set('avatar_url', data.avatar_url);
+    user.set('authData', {
+      github: {
+        uid: data.id + '',
+        access_token
+      }
+    });
     return user.save();
   }).catch((error) => {
-    if (error.code === 137) {
+    if (error.code === 137 && userId) {
+      G_error = true
       // 代表名字重复了      
       var _user = new AV.Query('_User');
       return _user.get(userId);
@@ -165,13 +172,23 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
       throw new AV.Cloud.Error('服务器内部', { code: 300 });
     }
   }).then(user => {
-    user.set('name', name(data.name) + (new Date()).valueOf());
-    user.set('email', data.email);
-    user.set('blog', data.blog);
-    user.set('bio', data.bio);
-    user.set('github_url', data.html_url);
-    user.set('avatar_url', data.avatar_url);
-    return user.save();
+    if (G_error) {
+      user.set('name', name(data.name) + (new Date()).valueOf());
+      user.set('username', data.email);
+      user.set('email', data.email);
+      user.set('blog', data.blog);
+      user.set('bio', data.bio);
+      user.set('github_url', data.html_url);
+      user.set('avatar_url', data.avatar_url);
+      user.set('authData', {
+        github: {
+          uid: data.id + '',
+          access_token
+        }
+      });
+      return user.save();
+    }
+    return;
   }).then(_ => {
     return {
       access_token,
