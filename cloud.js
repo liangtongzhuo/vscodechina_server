@@ -106,11 +106,11 @@ AV.Cloud.define('atricleMessage', function (request) {
 AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
   if (!request.params.code) throw new AV.Cloud.Error('没有 code', { code: 301 });
   const url = 'https://github.com/login/oauth/access_token'
-    + '?client_id=538a8b0fb32787b493c7'
-    + '&client_secret=9bb2b07e4b4bada9c816b7d5ab93245aa78bb840'
+    + '?client_id=' + process.env.github_client_id
+    + '&client_secret=' + process.env.github_client_secret
     + '&redirect_uri=http://127.0.0.1:3000/other/login&code='
     + request.params.code + '';
-  
+
     let access_token, data;
   // 换取 access_token
   return rp({
