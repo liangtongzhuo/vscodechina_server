@@ -102,13 +102,12 @@ AV.Cloud.define('atricleMessage', function (request) {
  * 登陆时候更新 github 数据
  * 返回 access_token 与 githubId
  */
-
 AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
   if (!request.params.code) throw new AV.Cloud.Error('没有 code', { code: 301 });
   const url = 'https://github.com/login/oauth/access_token'
     + '?client_id=' + process.env.github_client_id
     + '&client_secret=' + process.env.github_client_secret
-    + '&redirect_uri=http://127.0.0.1:3000/other/login&code='
+    + '&redirect_uri=http://127.0.0.1:3000/other/oauth&code='
     + request.params.code + '';
 
   let access_token, data;
