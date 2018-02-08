@@ -148,7 +148,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     user.set('email', data.email);
     user.set('blog', data.blog);
     user.set('bio', data.bio);
-    user.set('uid', data.id + '');
+    user.set('github_url', data.html_url);
     user.set('avatar_url', data.avatar_url);
     return user.save();
   }).then(result => {
