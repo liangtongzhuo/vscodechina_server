@@ -150,9 +150,6 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     userId = user.id;
     // 给创建的账号设置信息
     user.set('name', name(data.name));
-    if (requestUserId !== 0){
-      user.set('username', data.email);      
-    }
     user.set('email', data.email);
     user.set('blog', data.blog);
     user.set('bio', data.bio);
@@ -169,9 +166,6 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     }
   }).then(user => {
     user.set('name', name(data.name) + (new Date()).valueOf());
-    if (requestUserId !== 0){
-      user.set('username', data.email);      
-    }
     user.set('email', data.email);
     user.set('blog', data.blog);
     user.set('bio', data.bio);
