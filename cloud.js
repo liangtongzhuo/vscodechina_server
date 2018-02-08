@@ -111,7 +111,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     + '&redirect_uri=http://127.0.0.1:3000/other/login&code='
     + request.params.code + '';
 
-    let access_token, data;
+  let access_token, data;
   // 换取 access_token
   return rp({
     method: 'POST',
@@ -143,7 +143,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     }, 'github');
   }).then(user => {
     // 给创建的账号设置信息
-    user.set('name', data.name);
+    user.set('name', name(data.name));
     user.set('username', data.email);
     user.set('email', data.email);
     user.set('blog', data.blog);
@@ -161,3 +161,16 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     throw new AV.Cloud.Error('服务器内部', { code: 300 });
   });
 });
+
+// 名字内有空格与@都去掉
+function name(name) {
+  let str = '';
+  for (let i = 0; i < name.length; i++) {
+    const s = name[i];
+    if (s !== '@' && s !== ' ') {
+        str += s;
+    }
+  }
+
+  return str;
+}
