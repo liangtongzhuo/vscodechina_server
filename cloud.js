@@ -110,7 +110,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     + '&redirect_uri=http://127.0.0.1:3000/other/oauth&code='
     + request.params.code + '';
 
-  let access_token, data;
+  let access_token, data, userId;
   // 换取 access_token
   return rp({
     method: 'POST',
@@ -133,6 +133,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     return users.find();
   }).then(users => {
     if (users && users.length > 0) {
+      userId = users[0].id;
       return users[0];
     }
     // 如果以前没有则创建
@@ -141,6 +142,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
       'access_token': access_token
     }, 'github');
   }).then(user => {
+    userId = user.id;
     // 给创建的账号设置信息
     user.set('name', name(data.name));
     user.set('username', data.email);
@@ -150,7 +152,24 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     user.set('github_url', data.html_url);
     user.set('avatar_url', data.avatar_url);
     return user.save();
-  }).then(result => {
+  }).catch((error) => {
+    if (error.code === 137) {
+      // 代表名字重复了      
+      var _user = new AV.Query('_User');
+      return _user.get(userId);
+    } else {
+      throw new AV.Cloud.Error('服务器内部', { code: 300 });
+    }
+  }).then(user => {
+    user.set('name', name(data.name) + (new Date()).valueOf());
+    user.set('username', data.email);
+    user.set('email', data.email);
+    user.set('blog', data.blog);
+    user.set('bio', data.bio);
+    user.set('github_url', data.html_url);
+    user.set('avatar_url', data.avatar_url);
+    return user.save();
+  }).then(_ => {
     return {
       access_token,
       uid: data.id + ''
@@ -167,7 +186,7 @@ function name(name) {
   for (let i = 0; i < name.length; i++) {
     const s = name[i];
     if (s !== '@' && s !== ' ') {
-        str += s;
+      str += s;
     }
   }
 
