@@ -1,1 +1,1 @@
-# vscodechina_server
+Visual Studio Code China 服务端

@@ -1,8 +1,6 @@
 const AV = require('leanengine');
-var rp = require('request-promise');
-var qs = require('querystring');
-
-
+const rp = require('request-promise');
+const qs = require('querystring');
 
 /**
  * 留言点赞数的增加与减少
@@ -73,6 +71,8 @@ AV.Cloud.define('atricleLike', function (request) {
   });
 });
 
+
+
 /**
  * 文章留言
  */
@@ -102,15 +102,16 @@ AV.Cloud.define('atricleMessage', function (request) {
  * 登陆时候更新 github 数据
  * 返回 access_token 与 githubId
  */
-AV.Cloud.define('gitHubOauth', function (request) {
+
+AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
   if (!request.params.code) throw new AV.Cloud.Error('没有 code', { code: 301 });
   const url = 'https://github.com/login/oauth/access_token'
     + '?client_id=538a8b0fb32787b493c7'
     + '&client_secret=9bb2b07e4b4bada9c816b7d5ab93245aa78bb840'
     + '&redirect_uri=http://127.0.0.1:3000/other/login&code='
-    + request.params.code;
-
-  let access_token, data
+    + request.params.code + '';
+  
+    let access_token, data;
   // 换取 access_token
   return rp({
     method: 'POST',
@@ -119,14 +120,15 @@ AV.Cloud.define('gitHubOauth', function (request) {
     access_token = qs.parse(body).access_token;
     // access_token 换取个人信息    
     return rp({
-      url: 'https://api.github.com/user?access_token=' + access_token,
+      url: 'https://api.github.com/user',
       headers: {
-        'User-Agent': 'Awesome-Octocat-App'
+        'User-Agent': 'Awesome-Octocat-App',
+        'Authorization': 'token ' + access_token
       }
     });
   }).then(body => {
     data = JSON.parse(body);
-    // 根据个人信息查询，以前是否已经有注册的账号了
+    // 根据个人信息查询，以前是否已经有注册的账号    
     const users = new AV.Query('_User');
     users.equalTo('email', data.email);
     return users.find();
@@ -146,18 +148,16 @@ AV.Cloud.define('gitHubOauth', function (request) {
     user.set('email', data.email);
     user.set('blog', data.blog);
     user.set('bio', data.bio);
-    user.set('uid', data.id);
+    user.set('uid', data.id + '');
     user.set('avatar_url', data.avatar_url);
     return user.save();
   }).then(result => {
     return {
       access_token,
-      openid: data.id
+      uid: data.id + ''
     };
   }).catch((error) => {
     console.log(error.message)
-    throw new AV.Cloud.Error('服务器请求失败', { code: 302 });
+    throw new AV.Cloud.Error('服务器内部', { code: 302 });
   });
 });
-
-
