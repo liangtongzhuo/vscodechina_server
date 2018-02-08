@@ -158,6 +158,6 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
     };
   }).catch((error) => {
     console.log(error.message)
-    throw new AV.Cloud.Error('服务器内部', { code: 302 });
+    throw new AV.Cloud.Error('服务器内部', { code: 300 });
   });
 });
