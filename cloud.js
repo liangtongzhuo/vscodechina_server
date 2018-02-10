@@ -107,7 +107,7 @@ AV.Cloud.define('gitHubOauth', { fetchUser: false }, function (request) {
   const url = 'https://github.com/login/oauth/access_token'
     + '?client_id=' + process.env.github_client_id
     + '&client_secret=' + process.env.github_client_secret
-    + '&redirect_uri=http://127.0.0.1:3000/other/oauth&code='
+    + '&redirect_uri=http://vscode-china.com/other/oauth&code='
     + request.params.code + '';
 
   let access_token, data, userId, G_error, requestUserId = request.params.state || 0;
