@@ -10,7 +10,6 @@ AV.Cloud.define('messageLike', function (request) {
   if (!request.params.id) throw new AV.Cloud.Error('没有 data id', { code: 302 });
 
   const query = new AV.Query('Message');
-
   return query.get(request.params.id).then(data => {
     let likeUsers = data.get('likeUsers') && data.get('likeUsers').split(',');
     if (!likeUsers || likeUsers.length === 0) {
