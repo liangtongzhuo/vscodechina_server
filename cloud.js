@@ -2,6 +2,8 @@ const AV = require('leanengine');
 const rp = require('request-promise');
 const qs = require('querystring');
 
+const Message = AV.Object.extend('Message');
+
 /**
  * 留言点赞数的增加与减少
  */
@@ -9,7 +11,7 @@ AV.Cloud.define('messageLike', function (request) {
   if (!request.currentUser) throw new AV.Cloud.Error('没有登陆', { code: 301 });
   if (!request.params.id) throw new AV.Cloud.Error('没有 data id', { code: 302 });
 
-  const query = new AV.Query('Message');
+  const query = AV.Query(Message);
   return query.get(request.params.id).then(data => {
     let likeUsers = data.get('likeUsers') && data.get('likeUsers').split(',');
     if (!likeUsers || likeUsers.length === 0) {
@@ -81,7 +83,6 @@ AV.Cloud.define('atricleMessage', function (request) {
   if (!request.params.message) throw new AV.Cloud.Error('没有 message id', { code: 303 });
 
   // 创建留言
-  const Message = AV.Object.extend('Message');
   const atricle = AV.Object.createWithoutData('Atricle', request.params.atricleId);
   const mes = new Message();
   mes.set('message', request.params.message);
